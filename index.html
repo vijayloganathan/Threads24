@@ -34,39 +34,33 @@
     <video id="camera-feed" autoplay></video>
     <p id="result"></p>
     <button id="start-scan" onclick="startScanning()">Start Scanning</button>
+    <button id="switch-camera" onclick="switchCamera()">Switch Camera</button>
 
     <script>
-        function startScanning() {
-            const video = document.getElementById('camera-feed');
-            const result = document.getElementById('result');
+        let currentCamera = 'environment'; // 'environment' for back camera, 'user' for front camera
+        const video = document.getElementById('camera-feed');
+        const result = document.getElementById('result');
 
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                .then((stream) => {
-                    video.srcObject = stream;
+        async function startScanning() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentCamera } });
 
-                    if (typeof Instascan !== 'undefined') {
-                        const scanner = new Instascan.Scanner({ video });
-                        scanner.addListener('scan', (content) => {
-                            result.innerText = `Scanned QR Code: ${content}`;
-                        });
+                video.srcObject = stream;
 
-                        Instascan.Camera.getCameras()
-                            .then((cameras) => {
-                                if (cameras.length > 0) {
-                                    scanner.start(cameras[0]);
-                                } else {
-                                    console.error('No cameras found.');
-                                }
-                            })
-                            .catch((error) => console.error(error));
-                    } else {
-                        console.error('Instascan library not loaded.');
-                    }
-                })
-                .catch((error) => console.error(error));
+                const barcodeDetector = new BarcodeDetector();
+                
+                const code = await barcodeDetector.detect(video);
+
+                result.innerText = `Scanned QR Code: ${code[0]?.rawValue || 'No QR Code detected'}`;
+            } catch (error) {
+                console.error('Error accessing the camera:', error);
+            }
+        }
+
+        function switchCamera() {
+            currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+            startScanning(); // Restart scanning with the new camera
         }
     </script>
-
-    <script src="https://cdn.rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 </body>
 </html>
