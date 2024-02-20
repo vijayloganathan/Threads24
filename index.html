@@ -51,7 +51,11 @@
                 
                 const code = await barcodeDetector.detect(video);
 
-                result.innerText = `Scanned QR Code: ${code[0]?.rawValue || 'No QR Code detected'}`;
+                if (code.length > 0) {
+                    result.innerText = `Scanned QR Code: ${code[0].rawValue}`;
+                } else {
+                    result.innerText = 'No QR Code detected';
+                }
             } catch (error) {
                 console.error('Error accessing the camera:', error);
             }
