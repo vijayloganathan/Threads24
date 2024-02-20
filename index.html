@@ -44,25 +44,29 @@
                 .then((stream) => {
                     video.srcObject = stream;
 
-                    const scanner = new Instascan.Scanner({ video });
-                    scanner.addListener('scan', (content) => {
-                        result.innerText = `Scanned QR Code: ${content}`;
-                    });
+                    if (typeof Instascan !== 'undefined') {
+                        const scanner = new Instascan.Scanner({ video });
+                        scanner.addListener('scan', (content) => {
+                            result.innerText = `Scanned QR Code: ${content}`;
+                        });
 
-                    Instascan.Camera.getCameras()
-                        .then((cameras) => {
-                            if (cameras.length > 0) {
-                                scanner.start(cameras[0]);
-                            } else {
-                                console.error('No cameras found.');
-                            }
-                        })
-                        .catch((error) => console.error(error));
+                        Instascan.Camera.getCameras()
+                            .then((cameras) => {
+                                if (cameras.length > 0) {
+                                    scanner.start(cameras[0]);
+                                } else {
+                                    console.error('No cameras found.');
+                                }
+                            })
+                            .catch((error) => console.error(error));
+                    } else {
+                        console.error('Instascan library not loaded.');
+                    }
                 })
                 .catch((error) => console.error(error));
         }
     </script>
 
-    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="https://cdn.rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 </body>
 </html>
